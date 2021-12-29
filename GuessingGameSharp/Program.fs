@@ -62,7 +62,8 @@ let displayEndState (hasWon, number, count) =
 
 [<EntryPoint>]
 let main args =
-    let range = parseRange args
-    let (hasWon, number, count) = runGame range
-    displayEndState (hasWon, number, count)
+    args
+    |> parseRange
+    |> runGame
+    |> displayEndState
     0
