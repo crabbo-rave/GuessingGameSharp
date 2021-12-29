@@ -6,20 +6,16 @@ let (|Parse|_|) (str: string) : int option =
     | true, value -> Some value
     | _ -> None
 
-[<EntryPoint>]
-let main args = 
+let parseRange args =
+    match args with
+    | [| Parse range |] when range > 100 || range < 1 -> failwith "Error: Range must be between 1 and 100"
+    | [| Parse range |] -> range
+    | [||] -> failwith "Error: Provide range as a command line argument"
+    | _ -> failwith "Error: Provide integer range"
+
+let runGame range =
     let random = Random()
     let mutable count = 0
-    let range =
-        match args with
-        | [| Parse range |] ->
-            if range > 100 && 1 < range then
-                failwith "Error: Range must be within 1 and 1000"
-            else
-                range
-        | [||] -> failwith "Error: Provide range as commandline argument"
-        | _ -> 
-            failwith "Error: Provide integer range."
     let guesses = List<int>()
     let mutable hasWon = false
     let number = random.Next(range+1)
@@ -29,8 +25,8 @@ let main args =
     let mutable Break = false
     while not Break do
         let userInput = Console.ReadLine()
-        match userInput with 
-        | Parse input -> 
+        match userInput with
+        | Parse input ->
             guess <- input
             if guesses.Contains guess then
                 Console.WriteLine "You already guessed that!!"
@@ -51,13 +47,23 @@ let main args =
             if input.Equals "give up" then
                 hasWon <- false
                 Break <- true
-            else 
+            else
                 Console.WriteLine $"\"{userInput}\" should be an integer: "
-    match hasWon with 
+    hasWon, number, count
+
+let displayEndState (hasWon, number, count) =
+    match hasWon with
     | true ->
         Console.Clear()
         Console.WriteLine $"Yay! you guessed my number!! It took you {count} tries! (Not counting bad inputs.)"
-    | _ -> 
+    | _ ->
         Console.Clear()
-        Console.WriteLine $":( You gave up. The number was {number}. It took you {count} tries. (Not counting bad inputs.)" 
+        Console.WriteLine $":( You gave up. The number was {number}. It took you {count} tries. (Not counting bad inputs.)"
+
+[<EntryPoint>]
+let main args =
+    args
+    |> parseRange
+    |> runGame
+    |> displayEndState
     0
