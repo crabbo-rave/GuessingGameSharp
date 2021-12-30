@@ -6,19 +6,29 @@ let (|Parse|_|) (str: string) : int option =
     | true, value -> Some value
     | _ -> None
 
+let parse = 
+  function
+  | Parse v -> v
+  | v -> failwithf "Argument provided was not an int: '%s'" v
+
+let clamp (lower,upper) x = 
+  if x < lower then failwithf "Argument must be greater than or equal to %i but was %i" lower x
+  elif x > upper then failwithf "Argument must be less than or equal to %i but was %i" upper x
+  else x
+
 let parseRange args =
-    match args with
-    | [| Parse range |] when range > 100 || range < 1 -> failwith "Error: Range must be between 1 and 100"
-    | [| Parse range |] -> range
-    | [||] -> failwith "Error: Provide range as a command line argument"
-    | _ -> failwith "Error: Provide integer range"
+  Array.tryHead args
+  |> Option.map (parse>>clamp (1,350))
+  |> function
+    | None -> failwith "Range was not provided"
+    | Some x -> x
 
 let runGame range =
     let random = Random()
     let mutable count = 0
     let guesses = List<int>()
     let mutable hasWon = false
-    let number = random.Next(range+1)
+    let number = random.Next(1, range+1)
     Console.WriteLine $"OK, let's start. I am thinking of a number between 1 to {range}"
     Console.WriteLine "Enter your guess: "
     let mutable guess = 0
