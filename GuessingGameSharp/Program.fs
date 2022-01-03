@@ -1,6 +1,17 @@
 ﻿open System
 open System.Collections.Generic
 
+type GameTermination =
+    | Won
+    | GaveUp
+
+type GameState = {
+    Guesses:Set<int>
+    Target:int
+    Count:int
+    Termination: GameTermination option
+}
+
 let (|Parse|_|) (str: string) : int option =
     match Int32.TryParse(str) with
     | true, value -> Some value
