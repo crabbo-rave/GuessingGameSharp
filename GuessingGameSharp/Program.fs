@@ -71,7 +71,6 @@ let runGame range : (GameState * GameState) option =
                     gameState.Guesses.Add(guess)
                     gameState <- { gameState with Count = gameState.Count + 1 }
                     Console.WriteLine "Enter your guess: "
-                    Some (gameState, gameState)
                 | _ as input ->
                     if input.Equals "give up" then
                         gameState <- { gameState with Termination = Some GaveUp }
@@ -79,7 +78,7 @@ let runGame range : (GameState * GameState) option =
                     else
                         Console.WriteLine $"\"{userInput}\" should be an integer: "
                         Some (gameState, gameState)
-                Some (gameState, gameState) )
+                )
             |> Seq.last
 
 let displayEndState (hasWon, number, count) =
