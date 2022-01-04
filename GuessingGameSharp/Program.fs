@@ -65,7 +65,7 @@ let runGame range : (GameState * GameState) option =
                     elif guess > gameState.Target then
                         Console.WriteLine $"{guess} is too high!"
                         Some (gameState, gameState)
-                    else
+                    else    
                         gameState <- { gameState with Termination = Some Won }
                         None
                     gameState.Guesses.Add(guess)
@@ -74,7 +74,7 @@ let runGame range : (GameState * GameState) option =
                 | _ as input ->
                     if input.Equals "give up" then
                         gameState <- { gameState with Termination = Some GaveUp }
-                        None
+                        None 
                     else
                         Console.WriteLine $"\"{userInput}\" should be an integer: "
                         Some (gameState, gameState)
