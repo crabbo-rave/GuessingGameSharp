@@ -52,25 +52,26 @@ let runGame range : (GameState * GameState) option =
                 match userInput with
                 | Parse input ->
                     guess <- input
-                    if gameState.Guesses.Contains guess then
-                        Console.WriteLine "You already guessed that!!"
-                        Some (gameState, gameState)
-                    elif 0 >= guess || guess > range then
-                        Console.WriteLine $"Sorry, {guess} is less than or equal to zero or greater than {range}."
-                        gameState <- { gameState with Count = gameState.Count - 1 }
-                        Some (gameState, gameState)
-                    elif guess < gameState.Target then
-                        Console.WriteLine $"{guess} is too low!"
-                        Some (gameState, gameState)
-                    elif guess > gameState.Target then
-                        Console.WriteLine $"{guess} is too high!"
-                        Some (gameState, gameState)
-                    else
-                        gameState <- { gameState with Termination = Some Won }
-                        None
-                    gameState.Guesses.Add(guess)
-                    gameState <- { gameState with Count = gameState.Count + 1 }
+                    let next =
+                        if gameState.Guesses.Contains guess then
+                            Console.WriteLine "You already guessed that!!"
+                            Some (gameState, gameState)
+                        elif 0 >= guess || guess > range then
+                            Console.WriteLine $"Sorry, {guess} is less than or equal to zero or greater than {range}."
+                            gameState <- { gameState with Count = gameState.Count - 1 }
+                            Some (gameState, gameState)
+                        elif guess < gameState.Target then
+                            Console.WriteLine $"{guess} is too low!"
+                            Some (gameState, gameState)
+                        elif guess > gameState.Target then
+                            Console.WriteLine $"{guess} is too high!"
+                            Some (gameState, gameState)
+                        else
+                            gameState <- { gameState with Termination = Some Won }
+                            None
+                    gameState <- { gameState with Count = gameState.Count + 1;Guesses = gameState.Guesses.Add(guess) }
                     Console.WriteLine "Enter your guess: "
+                    next
                 | _ as input ->
                     if input.Equals "give up" then
                         gameState <- { gameState with Termination = Some GaveUp }
