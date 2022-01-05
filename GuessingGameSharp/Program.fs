@@ -1,5 +1,11 @@
 ﻿open System
 open System.Collections.Generic
+open System.IO
+
+let cclear() =
+    try
+        Console.Clear()
+    with | :? IOException as io -> eprintfn "Couldn't clear console: %s" io.Message
 
 type GameTermination =
     | Won
@@ -29,7 +35,7 @@ let clamp (lower,upper) x =
 
 let parseRange args =
     Array.tryHead args
-    |> Option.map (parse>>clamp (1,350))
+    |> Option.map (parse >> clamp (1,350))
     |> function
         | None -> failwith "Range was not provided"
         | Some x -> x
@@ -39,46 +45,43 @@ let runGame range : GameState =
     let number = random.Next(1, range+1)
     Console.WriteLine $"OK, let's start. I am thinking of a number between 1 to {range}"
     Console.WriteLine "Enter your guess: "
-    let mutable guess = 0
-    let mutable gameState = 
-        {
-            Guesses = Set.empty
-            Target = number
-            Count = 0
-            Termination = None
-        }
-    gameState |> Seq.unfold (fun game -> 
-                let userInput = Console.ReadLine()
-                match userInput with
-                | Parse input ->
-                    guess <- input
-                    let next =
-                        if gameState.Guesses.Contains guess then
-                            Console.WriteLine "You already guessed that!!"
-                            Some (gameState, gameState)
-                        elif 0 >= guess || guess > range then
-                            Console.WriteLine $"Sorry, {guess} is less than or equal to zero or greater than {range}."
-                            gameState <- { gameState with Count = gameState.Count - 1 }
-                            Some (gameState, gameState)
-                        elif guess < gameState.Target then
-                            Console.WriteLine $"{guess} is too low!"
-                            Some (gameState, gameState)
-                        elif guess > gameState.Target then
-                            Console.WriteLine $"{guess} is too high!"
-                            Some (gameState, gameState)
-                        else
-                            gameState <- { gameState with Termination = Some Won }
-                            None
-                    gameState <- { gameState with Count = gameState.Count + 1;Guesses = gameState.Guesses.Add(guess) }
+    {
+        Guesses = Set.empty
+        Target = number
+        Count = 0
+        Termination = None
+    }
+    |> Seq.unfold (fun gameState -> 
+                match gameState.Termination with
+                | Some _ -> None
+                | None ->
                     Console.WriteLine "Enter your guess: "
-                    next
-                | _ as input ->
-                    if input.Equals "give up" then
-                        gameState <- { gameState with Termination = Some GaveUp }
-                        None
-                    else
-                        Console.WriteLine $"\"{userInput}\" should be an integer: "
-                        Some (gameState, gameState)
+                    let userInput = Console.ReadLine()
+                    match userInput with
+                    | Parse guess ->
+                        let addGuess() = gameState.Guesses |> Set.add guess
+                        let next =
+                            if gameState.Guesses.Contains guess then
+                                printfn "You already guessed that!"
+                                gameState
+                            elif 0 >= guess || guess > range then
+                                printfn $"Sorry, {guess} is less than or equal to zero or greater than {range}."
+                                gameState
+                            elif guess < gameState.Target then
+                                printfn $"{guess} is too low!"
+                                { gameState with Guesses = addGuess() }
+                            elif guess > gameState.Target then
+                                printfn $"{guess} is too high!"
+                                { gameState with Guesses = addGuess()  }
+                            else
+                                { gameState with Termination = Some Won; Guesses = addGuess() }
+                        Some(next,next) 
+                    | "give up" ->
+                        let next = { gameState with Termination = Some GaveUp }
+                        Some(next,next)
+                    | userInput ->
+                            printfn $"\"{userInput}\" should be an integer: "
+                            Some (gameState, gameState)
                 )
             |> Seq.last
 
@@ -87,16 +90,15 @@ let displayEndState (state: GameState) =
     | Some termination ->
         match termination with
         | Won ->
-            Console.Clear()
+            cclear()
             Console.WriteLine $"Yay! you guessed my number!! It took you {state.Count} tries! (Not counting bad inputs.)"
         | _ ->
-            Console.Clear()
+            cclear()
             Console.WriteLine $":( You gave up. The number was {state.Target}. It took you {state.Count} tries. (Not counting bad inputs.)"
     | _ -> 
-        Console.Clear()
+        cclear()
         failwith "Error processing termination"
         
-
 [<EntryPoint>]
 let main args =
     args
