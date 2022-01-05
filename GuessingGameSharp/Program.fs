@@ -100,7 +100,6 @@ let displayEndState (state: GameState) =
 [<EntryPoint>]
 let main args =
     args
-    |> fun _ -> [| "2" |]
     |> parseRange
     |> runGame
     |> displayEndState
