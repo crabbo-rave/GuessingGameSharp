@@ -14,7 +14,7 @@ type GameTermination =
 type GameState = {
     Guesses:Set<int>
     Target:int
-    Count:int
+    Count: int
     Termination: GameTermination option
 }
 
@@ -69,10 +69,10 @@ let runGame range : GameState =
                                 gameState
                             elif guess < gameState.Target then
                                 printfn $"{guess} is too low!"
-                                { gameState with Guesses = addGuess() }
+                                { gameState with Guesses = addGuess(); Count = gameState.Count + 1 }
                             elif guess > gameState.Target then
                                 printfn $"{guess} is too high!"
-                                { gameState with Guesses = addGuess()  }
+                                { gameState with Guesses = addGuess(); Count = gameState.Count + 1 }
                             else
                                 { gameState with Termination = Some Won; Guesses = addGuess() }
                         Some(next,next) 
