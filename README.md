@@ -2,7 +2,7 @@
 
 A simple guessing game in F#
 
-# Build
+# Running with .NET SDK
 
 Clone the repo with 
 
@@ -25,3 +25,7 @@ $ dotnet run <range>
 ```
 
 Where `<range>` is the upper range of the game. You will get the nessacery error messages for the range.
+
+# Running Without .NET SDK
+
+Go to releases and download the executable, and run it.
