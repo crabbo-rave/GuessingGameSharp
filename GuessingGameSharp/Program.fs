@@ -1,11 +1,5 @@
 ﻿open System
-open System.Collections.Generic
 open System.IO
-
-let cclear() =
-    try
-        Console.Clear()
-    with | :? IOException as io -> eprintfn "Couldn't clear console: %s" io.Message
 
 type GameTermination =
     | Won
@@ -23,17 +17,17 @@ let (|Parse|_|) (str: string) : int option =
     | true, value -> Some value
     | _ -> None
 
-let parse = 
-  function
-  | Parse v -> v
-  | v -> failwithf "Argument provided was not an int: '%s'" v
-
-let clamp (lower,upper) x = 
-  if x < lower then failwithf "Argument must be greater than or equal to %i but was %i" lower x
-  elif x > upper then failwithf "Argument must be less than or equal to %i but was %i" upper x
-  else x
-
 let parseRange args =
+    let parse = 
+      function
+      | Parse v -> v
+      | v -> failwithf "Argument provided was not an int: '%s'" v
+    
+    let clamp (lower,upper) x = 
+      if x < lower then failwithf "Argument must be greater than or equal to %i but was %i" lower x
+      elif x > upper then failwithf "Argument must be less than or equal to %i but was %i" upper x
+      else x
+
     Array.tryHead args
     |> Option.map (parse >> clamp (1,350))
     |> function
@@ -83,20 +77,22 @@ let runGame range : GameState =
                             printfn $"\"{userInput}\" should be an integer: "
                             Some (gameState, gameState)
                 )
-            |> Seq.last
+    |> Seq.last
 
 let displayEndState (state: GameState) =
+    let cclear() =
+        try
+            Console.Clear()
+        with | :? IOException as io -> eprintfn "Couldn't clear console: %s" io.Message
+    cclear()
     match state.Termination with
     | Some termination ->
         match termination with
         | Won ->
-            cclear()
             Console.WriteLine $"Yay! you guessed my number!! It took you {state.Count} tries! (Not counting bad inputs.)"
         | _ ->
-            cclear()
             Console.WriteLine $":( You gave up. The number was {state.Target}. It took you {state.Count} tries. (Not counting bad inputs.)"
     | _ -> 
-        cclear()
         failwith "Error processing termination"
         
 [<EntryPoint>]
